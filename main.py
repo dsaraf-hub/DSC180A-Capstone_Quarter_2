@@ -50,15 +50,13 @@ cleaned_embeds['embeddings'] = pd.Series(raw_embeddings)
 cleaned_embeds['tickers'] = extract_tickers(cleaned_embeds['Tweet'], words_to_search)
 
 vectors_to_upsert = []
-ctr = 0
 for i in cleaned_embeds['embeddings']:
   temp = []
   temp.append(str(ctr))
   temp.append(i[1])
   vectors_to_upsert.append(tuple(temp))
-  ctr = ctr + 1
 
-with pinecone.Index('categories', pool_threads=30) as index:
+with pinecone.Index('new-index', pool_threads=30) as index:
     # Send requests in parallel
     for i in range(0, len(vectors_to_upsert), 300):
       async_results = [
@@ -67,7 +65,6 @@ with pinecone.Index('categories', pool_threads=30) as index:
       ]
       # Wait for and retrieve responses (this raises in case of error)
       [async_result.get() for async_result in async_results]
-      print(i)
 
 """#Next Steps
 
