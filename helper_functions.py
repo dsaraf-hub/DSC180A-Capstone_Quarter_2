@@ -7,7 +7,6 @@ import pandas as pd
 import openai
 import os
 import re
-import pinecone
 
 # function to check if any word from the list is present in the string
 def is_word_present(string, words_list):
@@ -36,3 +35,33 @@ def extract_tickers(tweets, words_to_search):
           found.append(word)
       tickers.append(found)
     return pd.Series(tickers)
+
+def classify_tweet(ticker, text):
+  try:
+    response = openai.Completion.create(
+      model="text-davinci-003",
+      prompt=f"Is the following tweet positive, negative, or neutral news for {ticker}: \"{text}",
+      temperature=0.7,
+      max_tokens=256,
+      top_p=1,
+      frequency_penalty=0,
+      presence_penalty=0
+    )
+    resp = response['choices'][0]['text'].strip().lower()
+  except:
+    response = openai.Completion.create(
+      model="text-davinci-003",
+      prompt=f"Is the following tweet positive, negative, or neutral news for {ticker}: \"{text}",
+      temperature=0.7,
+      max_tokens=256,
+      top_p=1,
+      frequency_penalty=0,
+      presence_penalty=0
+    )
+    resp = response['choices'][0]['text'].strip().lower()
+  if 'positive' in resp:
+    return 'positive'
+  elif 'negative' in resp:
+    return 'negative'
+  else:
+    return 'neutral'
